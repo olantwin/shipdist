@@ -1,18 +1,15 @@
 package: ROOT
 version: "%(tag_basename)s%(defaults_upper)s"
-tag: v5-34-30-alice7
-source: https://github.com/alisw/root
+tag: "v6-10-08"
+source: https://github.com/root-mirror/root
 requires:
-  - AliEn-Runtime:(?!.*ppc64)
   - GSL
   - opengl:(?!osx)
   - Xdevel:(?!osx)
   - FreeType:(?!osx)
-  - "MySQL:slc7.*"
-  - GCC-Toolchain:(?!osx)
+  - Python-modules
 build_requires:
   - CMake
-  - "Xcode:(osx.*)"
 env:
   ROOTSYS: "$ROOT_ROOT"
 prepend_path:

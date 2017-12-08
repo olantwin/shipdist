@@ -1,13 +1,12 @@
 package: ZeroMQ
-version: v4.1.5
-source: https://github.com/alisw/zeromq
-requires:
-  - "GCC-Toolchain:(?!osx)"
+version: "%(tag_basename)s"
+tag: v4.2.2
+source: https://github.com/zeromq/libzmq
 build_requires:
   - autotools
 prefer_system: (?!slc5.*)
 prefer_system_check: |
-  printf "#include <zmq.h>\n#if(ZMQ_VERSION < 40103)\n#error \"zmq version >= 4.1.3 needed\"\n#endif\n int main(){}" | gcc -I$(brew --prefix zeromq)/include $([[ -d $(brew --prefix zeromq) ]] || echo "-l:libzmq.a") -xc++ - -o /dev/null 2>&1
+  printf "#include <zmq.h>\n#if(ZMQ_VERSION < 40202)\n#error \"zmq version >= 4.2.2 needed\"\n#endif\n int main(){}" | gcc -I$(brew --prefix zeromq)/include $([[ -d $(brew --prefix zeromq) ]] || echo "-l:libzmq.a") -xc++ - -o /dev/null 2>&1
 ---
 #!/bin/sh
 
