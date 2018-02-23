@@ -46,7 +46,7 @@ set version $PKGVERSION-@@PKGREVISION@$PKGHASH@@
 module-whatis "ALICE Modulefile for $PKGNAME $PKGVERSION-@@PKGREVISION@$PKGHASH@@"
 # Dependencies
 module load BASE/1.0                                                                            \\
-            FairSoft/$FAIRSOFT_VERSION-$FAIRSOFT_REVISION}                                      \\
+            FairSoft/$FAIRSOFT_VERSION-$FAIRSOFT_REVISION
 # Our environment
 setenv FAIRROOT_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
 setenv VMCWORKDIR \$::env(FAIRROOT_ROOT)/share/fairbase/examples
