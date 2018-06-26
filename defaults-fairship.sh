@@ -31,8 +31,8 @@ overrides:
     tag: v4.8.3
   ROOT:
     version: "%(tag_basename)s"
-    tag: "v6-13-02-ship"
-    source: https://github.com/ShipSoft/root
+    tag: "v6-12-06-ship"
+    source: https://github.com/olantwin/root
     requires:
       - GSL
       - opengl:(?!osx)
