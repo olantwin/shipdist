@@ -1,25 +1,31 @@
 package: DDS
-version: "master-%(short_hash)s"
+version: "%(tag_basename)s"
+tag: "2.0"
 source: https://github.com/FairRootGroup/DDS
 requires:
   - boost
 build_requires:
   - CMake
-tag: "1.4"
 ---
-#!/bin/sh
+#!/bin/bash -ex
 
 case $ARCHITECTURE in
-  osx*) BOOST_ROOT=$(brew --prefix boost) ;;
+  osx*)
+    [[ ! $BOOST_ROOT ]] && BOOST_ROOT=`brew --prefix boost` ;;
 esac
 
-cmake $SOURCEDIR                                              \
-      -DCMAKE_INSTALL_PREFIX=$INSTALLROOT                     \
-      ${BOOST_ROOT:+-DBOOST_ROOT=$BOOST_ROOT}                 \
-      ${BOOST_ROOT:+-DBoost_DIR=$BOOST_ROOT}                  \
-      ${BOOST_ROOT:+-DBoost_INCLUDE_DIR=$BOOST_ROOT/include}
 
-make ${JOBS+-j 1} wn_bin; make ${JOBS+-j 1} install
+cmake                                                                \
+  ${C_COMPILER:+-DCMAKE_C_COMPILER=$C_COMPILER}                      \
+  ${CXX_COMPILER:+-DCMAKE_CXX_COMPILER=$CXX_COMPILER}                \
+  ${CXX_COMPILER:+-DCMAKE_LINKER=$CXX_COMPILER}                      \
+  -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE                               \
+  -DCMAKE_INSTALL_PREFIX=$INSTALLROOT                                \
+  ${BOOST_ROOT:+-DBOOST_ROOT=$BOOST_ROOT -DBoost_NO_SYSTEM_PATHS=ON} \
+  $SOURCEDIR
+
+cmake --build . --target wn_bin ${JOBS:+-- -j$JOBS}
+cmake --build . --target install ${JOBS:+-- -j$JOBS}
 
 MODULEDIR="$INSTALLROOT/etc/modulefiles"
 MODULEFILE="$MODULEDIR/$PKGNAME"
@@ -33,7 +39,7 @@ proc ModulesHelp { } {
 set version $PKGVERSION-@@PKGREVISION@$PKGHASH@@
 module-whatis "ALICE Modulefile for $PKGNAME $PKGVERSION-@@PKGREVISION@$PKGHASH@@"
 # Dependencies
-module load BASE/1.0 ${BOOST_VERSION:+boost/$BOOST_VERSION-$BOOST_REVISION}  ${GCC_TOOLCHAIN_ROOT:+GCC-Toolchain/$GCC_TOOLCHAIN_VERSION-$GCC_TOOLCHAIN_REVISION}
+module load BASE/1.0 ${BOOST_VERSION:+boost/$BOOST_VERSION-$BOOST_REVISION} ${GCC_TOOLCHAIN_VERSION:+GCC-Toolchain/$GCC_TOOLCHAIN_VERSION-$GCC_TOOLCHAIN_REVISION}
 # Our environment
 setenv DDS_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
 prepend-path PATH \$::env(DDS_ROOT)/bin

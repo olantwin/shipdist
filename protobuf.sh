@@ -1,17 +1,23 @@
 package: protobuf
-version: v2.6.1
+version: "%(tag_basename)s"
+tag: "v3.4.0"
 source: https://github.com/google/protobuf
 build_requires:
  - autotools
  - "GCC-Toolchain:(?!osx)"
 prefer_system: "(?!slc5)"
 prefer_system_check: |
-  which protoc || { echo "protoc missing"; exit 1; }
-  printf "#include \"google/protobuf/any.h\"\nint main(){}" | c++ -I$(brew --prefix protobuf)/include -Wno-deprecated-declarations -xc++ - -o /dev/null
+  printf "#include <google/protobuf/any.h>\n#if(GOOGLE_PROTOBUF_VERSION < 3004000)\n#error \"protobuf version >= 3.4.0 needed\"\n#endif\nint main(){}" | c++ -I$(brew --prefix protobuf)/include -Wno-deprecated-declarations -xc++ - -o /dev/null && which protoc &> /dev/null
 ---
 
 rsync -av --delete --exclude="**/.git" $SOURCEDIR/ .
 autoreconf -ivf
+
+# Set the environment variables CC and CXX if a compiler is defined in the defaults file 
+# In case CC and CXX are defined the corresponding compilers are used during compilation  
+[[ -z "$CXX_COMPILER" ]] || export CXX=$CXX_COMPILER
+[[ -z "$C_COMPILER" ]] || export CC=$C_COMPILER
+
 ./configure --prefix="$INSTALLROOT"
 make ${JOBS:+-j $JOBS}
 make install

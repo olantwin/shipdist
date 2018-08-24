@@ -1,26 +1,26 @@
 package: defaults-fairship
 version: v1
 env:
-  CXXFLAGS: "-fPIC -g -O2 -std=c++11"
-  CFLAGS: "-fPIC -g -O2"
+  CXXFLAGS: "-fPIC -O2 -std=c++11"
+  CXX_STANDARD: "11"
+  CFLAGS: "-fPIC -O2"
   CMAKE_BUILD_TYPE: "RELEASE"
 disable:
   - AliEn-Runtime
   - MonALISA-gSOAP-client
   - AliEn-CAs
   - ApMon-CPP
-  - DDS
 overrides:
   autotools:
     tag: v1.5.0
   boost:
     version:  "%(tag_basename)s"
-    tag: "v1.64.0-alice1"
+    tag: "v1.67.0"
     requires:
       - "GCC-Toolchain:(?!osx)"
       - Python
     prefer_system_check: |
-     printf "#include \"boost/version.hpp\"\n# if (BOOST_VERSION < 106400)\n#error \"Cannot use system's boost. Boost > 1.64.00 required.\"\n#endif\nint main(){}" | gcc -I$(brew --prefix boost)/include -xc++ - -o /dev/null
+     printf "#include \"boost/version.hpp\"\n# if (BOOST_VERSION != 106700)\n#error \"Cannot use system's boost. Boost > 1.64.00 required.\"\n#endif\nint main(){}" | gcc -I$(brew --prefix boost)/include -xc++ - -o /dev/null
   GCC-Toolchain:
     tag: v6.2.0-alice1
     prefer_system_check: |
@@ -29,10 +29,12 @@ overrides:
       which cc && test -f $(dirname $(which cc))/c++ && printf "#define GCCVER ((__GNUC__ << 16)+(__GNUC_MINOR__ << 8)+(__GNUC_PATCHLEVEL__))\n#if (GCCVER < 0x060000 || GCCVER > 0x090000)\n#error \"System's GCC cannot be used: we need GCC 6.X. We are going to compile our own version.\"\n#endif\n" | cc -xc++ - -c -o /dev/null
   XRootD:
     tag: v4.8.3
+  FairMQ:
+    tag: v1.2.6
   ROOT:
     version: "%(tag_basename)s"
-    tag: "v6-14-00-ship"
-    source: https://github.com/ShipSoft/root
+    tag: "v6-14-02"
+    source: https://github.com/root-mirror/root
     requires:
       - GSL
       - opengl:(?!osx)
@@ -52,57 +54,9 @@ overrides:
     tag: "release-1-16"
     prefer_system_check: |
       printf "#include \"gsl/gsl_version.h\"\n#define GSL_V GSL_MAJOR_VERSION * 100 + GSL_MINOR_VERSION\n# if (GSL_V < 116)\n#error \"Cannot use system's gsl. Notice we only support versions from 1.16 (included)\"\n#endif\nint main(){}" | gcc  -I$(brew --prefix gsl)/include -xc++ - -o /dev/null
-  protobuf:
-    version: "%(tag_basename)s"
-    tag: "v3.0.2"
-  CMake:
-    version: "%(tag_basename)s"
-    tag: "v3.9.4"
-    prefer_system_check: |
-      which cmake && case `cmake --version | sed -e 's/.* //' | cut -d. -f1,2,3 | head -n1` in [0-2]*|3.[0-7].*) exit 1 ;; esac
   FairRoot:
-    source: https://github.com/ShipSoft/FairRoot
-    version: "%(tag_basename)s"
-    tag: May30-ship
-    incremental_recipe: |
-      make -j$JOBS;make install; MODULEDIR="$INSTALLROOT/etc/modulefiles"
-      MODULEFILE="$MODULEDIR/$PKGNAME"
-      mkdir -p "$MODULEDIR"
-      cd $SOURCEDIR
-      FAIRROOT_HASH=$(git rev-parse HEAD)
-      cd $BUILDDIR
-      cat > "$MODULEFILE" <<EoF
-      #%Module1.0
-      proc ModulesHelp { } {
-      global version
-      puts stderr "ALICE Modulefile for $PKGNAME $PKGVERSION-@@PKGREVISION@$PKGHASH@@"
-      }
-      set version $PKGVERSION-@@PKGREVISION@$PKGHASH@@
-      module-whatis "ALICE Modulefile for $PKGNAME $PKGVERSION-@@PKGREVISION@$PK      GHASH@@"
-      # Dependencies
-      module load BASE/1.0                                                                            \\
-            ${GEANT3_VERSION:+GEANT3/$GEANT3_VERSION-$GEANT3_REVISION}                          \\
-            ${GEANT4_VMC_VERSION:+GEANT4_VMC/$GEANT4_VMC_VERSION-$GEANT4_VMC_REVISION}          \\
-            ${PROTOBUF_VERSION:+protobuf/$PROTOBUF_VERSION-$PROTOBUF_REVISION}                  \\
-            ${PYTHIA6_VERSION:+pythia6/$PYTHIA6_VERSION-$PYTHIA6_REVISION}                      \\
-            ${PYTHIA_VERSION:+pythia/$PYTHIA_VERSION-$PYTHIA_REVISION}                          \\
-            ${VGM_VERSION:+vgm/$VGM_VERSION-$VGM_REVISION}                                      \\
-            ${BOOST_VERSION:+boost/$BOOST_VERSION-$BOOST_REVISION}                              \\
-            ROOT/$ROOT_VERSION-$ROOT_REVISION                                                   \\
-            ${ZEROMQ_VERSION:+ZeroMQ/$ZEROMQ_VERSION-$ZEROMQ_REVISION}                          \\
-            ${NANOMSG_VERSION:+nanomsg/$NANOMSG_VERSION-$NANOMSG_REVISION}                      \\
-            ${GCC_TOOLCHAIN_ROOT:+GCC-Toolchain/$GCC_TOOLCHAIN_VERSION-$GCC_TOOLCHAIN_REVISION}
-      # Our environment
-      setenv FAIRROOT_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
-      setenv FAIRROOT_HASH $FAIRROOT_HASH
-      setenv VMCWORKDIR \$::env(FAIRROOT_ROOT)/share/fairbase/examples
-      setenv GEOMPATH \$::env(VMCWORKDIR)/common/geometry
-      setenv CONFIG_DIR \$::env(VMCWORKDIR)/common/gconfig
-      prepend-path PATH \$::env(FAIRROOT_ROOT)/bin
-      prepend-path LD_LIBRARY_PATH \$::env(FAIRROOT_ROOT)/lib
-      prepend-path ROOT_INCLUDE_PATH \$::env(FAIRROOT_ROOT)/include
-      $([[ ${ARCHITECTURE:0:3} == osx ]] && echo "prepend-path DYLD_LIBRARY_PATH      \$::env(FAIRROOT_ROOT)/lib")
-      EoF
+    tag: dev
+    source: https://github.com/FairRootGroup/FairRoot
   log4cpp:
     version: "%(tag_basename)s"
     tag: REL_1_1_1_Nov_26_2013

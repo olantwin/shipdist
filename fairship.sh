@@ -91,6 +91,8 @@ esac
 
 rsync -a $SOURCEDIR/ $INSTALLROOT/
 
+export FAIRROOTPATH="$FAIRROOT_ROOT"
+
 cmake $SOURCEDIR                                                 \
       -DFAIRBASE="$FAIRROOT_ROOT/share/fairbase"                 \
       -DFAIRROOTPATH="$FAIRROOT_ROOT"                            \
