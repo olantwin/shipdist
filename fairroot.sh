@@ -8,6 +8,7 @@ env:
   VMCWORKDIR: "$FAIRROOT_ROOT/share/fairroot/examples"
   GEOMPATH:   "$FAIRROOT_ROOT/share/fairroot/examples/common/geometry"
   CONFIG_DIR: "$FAIRROOT_ROOT/share/fairroot/examples/common/gconfig"
+  FAIRROOTPATH: "$FAIRROOT_ROOT"
 prepend_path:
   ROOT_INCLUDE_PATH: "$FAIRROOT_ROOT/include"
 incremental_recipe: |
@@ -57,9 +58,10 @@ set version $PKGVERSION-@@PKGREVISION@$PKGHASH@@
 module-whatis "ALICE Modulefile for $PKGNAME $PKGVERSION-@@PKGREVISION@$PKGHASH@@"
 # Dependencies
 module load BASE/1.0                                                                            \\
-            FairSoft/$FAIRSOFT_VERSION-$FAIRSOFT_REVISION}                                      \\
+            FairSoft/$FAIRSOFT_VERSION-$FAIRSOFT_REVISION
 # Our environment
 setenv FAIRROOT_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
+setenv FAIRROOTPATH \$::env(FAIRROOT_ROOT)
 setenv VMCWORKDIR \$::env(FAIRROOT_ROOT)/share/fairbase/examples
 setenv GEOMPATH \$::env(VMCWORKDIR)/common/geometry
 setenv CONFIG_DIR \$::env(VMCWORKDIR)/common/gconfig

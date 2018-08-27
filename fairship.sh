@@ -15,12 +15,7 @@ build_requires:
   - googletest
 incremental_recipe: |
   rsync -ar $SOURCEDIR/ $INSTALLROOT/
-  make ${JOBS:+-j$JOBS}
-  make test
-  make install
-  rsync -a $BUILDDIR/bin $INSTALLROOT/
-  # to be sure all header files are there
-  rsync -a $INSTALLROOT/*/*.h $INSTALLROOT/include
+  cmake --build . --target install ${JOBS:+-- -j$JOBS}
   #Get the current git hash
   cd $SOURCEDIR
   FAIRSHIP_HASH=$(git rev-parse HEAD)
@@ -68,7 +63,7 @@ incremental_recipe: |
   $([[ ${ARCHITECTURE:0:3} == osx ]] && echo "prepend-path DYLD_LIBRARY_PATH \$::env(FAIRSHIP_ROOT)/lib")
   EoF
 ---
-#!/bin/sh
+#!/bin/sh -e
 
 # Making sure people do not have SIMPATH set when they build fairroot.
 # Unfortunately SIMPATH seems to be hardcoded in a bunch of places in
@@ -91,13 +86,13 @@ esac
 
 rsync -a $SOURCEDIR/ $INSTALLROOT/
 
-export FAIRROOTPATH="$FAIRROOT_ROOT"
-
-cmake $SOURCEDIR                                                 \
+cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}                     \
+      -DCMAKE_INSTALL_PREFIX=${INSTALLROOT}                      \
+      ${C_COMPILER:+-DCMAKE_C_COMPILER=$C_COMPILER}              \
+      ${CXX_COMPILER:+-DCMAKE_CXX_COMPILER=$CXX_COMPILER}        \
       -DFAIRBASE="$FAIRROOT_ROOT/share/fairbase"                 \
       -DFAIRROOTPATH="$FAIRROOT_ROOT"                            \
       -DCMAKE_CXX_FLAGS="$CXXFLAGS"                              \
-      -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE                       \
       -DROOTSYS=$ROOTSYS                                         \
       -DROOT_CONFIG_SEARCHPATH=$ROOT_ROOT/bin                    \
       -DROOT_DIR=$ROOT_ROOT                                      \
@@ -122,15 +117,15 @@ cmake $SOURCEDIR                                                 \
       ${BOOST_ROOT:+-DBOOST_LIBRARYDIR=$BOOST_ROOT/lib}          \
       ${BOOST_ROOT:+-DBoost_NO_SYSTEM=TRUE}                      \
       ${GSL_ROOT:+-DGSL_DIR=$GSL_ROOT}                           \
-      -DCMAKE_INSTALL_PREFIX=$INSTALLROOT
+      $SOURCEDIR
 
-make ${JOBS:+-j$JOBS}
-make test
-make install
+cmake --build . --target install ${JOBS:+-- -j$JOBS}
 
-rsync -a $BUILDDIR/bin $INSTALLROOT/
+# rsync -a $BUILDDIR/bin $INSTALLROOT/
 # to be sure all header files are there
-rsync -a $INSTALLROOT/*/*.h $INSTALLROOT/include
+# rsync -a $INSTALLROOT/*/*.h $INSTALLROOT/include
+echo "$INSTALLROOT/*/*.h"
+echo "$INSTALLROOT/include"
 
 #Get the current git hash
 cd $SOURCEDIR
