@@ -3,16 +3,10 @@ version: master
 source: https://github.com/ShipSoft/FairShip
 tag: master
 requires:
-  - generators
-  - simulation
   - FairRoot
   - GENIE
-  - GEANT4
   - PHOTOSPP
   - EvtGen
-  - ROOT
-build_requires:
-  - googletest
 incremental_recipe: |
   rsync -ar $SOURCEDIR/ $INSTALLROOT/
   cmake --build . --target install ${JOBS:+-- -j$JOBS}
@@ -94,11 +88,9 @@ cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}                     \
       -DFAIRROOTPATH="$FAIRROOT_ROOT"                            \
       -DCMAKE_CXX_FLAGS="$CXXFLAGS"                              \
       -DROOTSYS=$ROOTSYS                                         \
-      -DROOT_CONFIG_SEARCHPATH=$ROOT_ROOT/bin                    \
       -DROOT_DIR=$ROOT_ROOT                                      \
       -DHEPMC_DIR=$HEPMC_ROOT                                    \
       -DHEPMC_INCLUDE_DIR=$HEPMC_ROOT/include/HepMC              \
-      -DEVTGENPATH=$EVTGEN_ROOT                                  \
       -DEVTGEN_INCLUDE_DIR=$EVTGEN_ROOT/include                  \
       -DEVTGEN_LIBRARY_DIR=$EVTGEN_ROOT/lib                      \
       -DPythia6_LIBRARY_DIR=$PYTHIA6_ROOT/lib                    \
@@ -109,13 +101,10 @@ cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}                     \
       -DGEANT4_ROOT=$GEANT4_ROOT                                 \
       -DGEANT4_VMC_ROOT=$GEANT4_VMC_ROOT                         \
       -DVGM_ROOT=$VGM_ROOT                                       \
-      -DGENIE_ROOT=$GENIE_ROOT                                   \
-      -DLHAPDF5_ROOT="$LHAPDF5_ROOT/share/lhapdf"                \
       ${CMAKE_VERBOSE_MAKEFILE:+-DCMAKE_VERBOSE_MAKEFILE=ON}     \
       ${BOOST_ROOT:+-DBOOST_ROOT=$BOOST_ROOT}                    \
       ${BOOST_ROOT:+-DBOOST_INCLUDEDIR=$BOOST_ROOT/include}      \
       ${BOOST_ROOT:+-DBOOST_LIBRARYDIR=$BOOST_ROOT/lib}          \
-      ${BOOST_ROOT:+-DBoost_NO_SYSTEM=TRUE}                      \
       ${GSL_ROOT:+-DGSL_DIR=$GSL_ROOT}                           \
       $SOURCEDIR
 

@@ -46,6 +46,11 @@ cmake                                                            \
 
 cmake --build . --target install ${JOBS:+-- -j$JOBS}
 
+#Get current git hash, needed by FairShip
+cd $SOURCEDIR
+FAIRROOT_HASH=$(git rev-parse HEAD)
+cd $BUILDDIR
+
 # Modulefile
 mkdir -p etc/modulefiles
 cat > etc/modulefiles/$PKGNAME <<EoF
@@ -62,6 +67,7 @@ module load BASE/1.0                                                            
 # Our environment
 setenv FAIRROOT_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
 setenv FAIRROOTPATH \$::env(FAIRROOT_ROOT)
+setenv FAIRROOT_HASH $FAIRROOT_HASH
 setenv VMCWORKDIR \$::env(FAIRROOT_ROOT)/share/fairbase/examples
 setenv GEOMPATH \$::env(VMCWORKDIR)/common/geometry
 setenv CONFIG_DIR \$::env(VMCWORKDIR)/common/gconfig
