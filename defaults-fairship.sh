@@ -68,7 +68,7 @@ overrides:
     requires:
       - "GCC-Toolchain:(?!osx)"
       - opengl
-      - XercesC
+      - xercesc
     env:
       G4INSTALL: "$GEANT4_ROOT"
       G4SYSTEM: "$(uname)-g++"

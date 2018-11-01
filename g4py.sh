@@ -7,7 +7,7 @@ requires:
   - Python-modules
   - ROOT
   - boost
-  - XercesC
+  - xercesc
   - opengl
 build_requires:
   - CMake
@@ -47,7 +47,7 @@ proc ModulesHelp { } {
 set version $PKGVERSION-@@PKGREVISION@$PKGHASH@@
 module-whatis "ALICE Modulefile for $PKGNAME $PKGVERSION-@@PKGREVISION@$PKGHASH@@"
 # Dependencies
-module load BASE/1.0 ROOT/$ROOT_VERSION-$ROOT_REVISION ${GEANT4_VERSION:+GEANT4/$GEANT4_VERSION-$GEANT4_REVISION} XercesC/$XERCESC_VERSION-$XERCESC_REVISION ${BOOST_VERSION:+boost/$BOOST_VERSION-$BOOST_REVISION}
+module load BASE/1.0 ROOT/$ROOT_VERSION-$ROOT_REVISION ${GEANT4_VERSION:+GEANT4/$GEANT4_VERSION-$GEANT4_REVISION} xercesc/$XERCESC_VERSION-$XERCESC_REVISION ${BOOST_VERSION:+boost/$BOOST_VERSION-$BOOST_REVISION}
 # Our environment
 setenv G4PY_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
 setenv PYTHONPATH \$::env(G4PY_ROOT)/lib:\$::env(G4PY_ROOT)/lib/g4py:\$::env(G4PY_ROOT)/lib/Geant4:\$::env(G4PY_ROOT)/lib/examples:\$::env(G4PY_ROOT)/lib/tests
