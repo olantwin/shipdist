@@ -33,7 +33,6 @@ incremental_recipe: |
 ---
 #!/bin/bash -e
 unset ROOTSYS
-export CXXFLAGS="$CXXFLAGS -march=native"
 
 COMPILER_CC=cc
 COMPILER_CXX=c++
