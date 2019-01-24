@@ -1,8 +1,8 @@
-package: defaults-release
+package: defaults-dev
 version: v1
 env:
-  CXXFLAGS: "-fPIC -O2 -std=c++11"
-  CXX_STANDARD: "11"
+  CXXFLAGS: "-fPIC -O2 -std=c++14 -march=native"
+  CXX_STANDARD: "14"
   CFLAGS: "-fPIC -O2"
   CMAKE_BUILD_TYPE: "RELEASE"
 disable:
@@ -33,7 +33,7 @@ overrides:
     tag: v1.2.6
   ROOT:
     version: "%(tag_basename)s"
-    tag: "v6-16-00"
+    tag: master
     source: https://github.com/root-mirror/root
     requires:
       - GSL
