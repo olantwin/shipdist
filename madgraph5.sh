@@ -2,7 +2,7 @@ package: madgraph5
 version: "%(tag_basename)s%(defaults_upper)s"
 source: https://github.com/ShipSoft/madgraph5
 requires:
-  - GCC-Toolchain
+  - GCC-Toolchain:(?!osx)
   - pythia
 tag: v2.6.3.2
 

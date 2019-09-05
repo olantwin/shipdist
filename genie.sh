@@ -3,7 +3,7 @@ version: "%(tag_basename)s"
 tag: fairshipdev
 source: https://github.com/ShipSoft/GENIE
 requires:
-  - GCC-Toolchain
+  - GCC-Toolchain:(?!osx)
   - ROOT
   - lhapdf5
   - pythia6
