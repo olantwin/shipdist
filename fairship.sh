@@ -7,6 +7,9 @@ requires:
   - GENIE
   - PHOTOSPP
   - EvtGen
+build_requires:
+ - "GCC-Toolchain:(?!osx)"
+ - CMake
 incremental_recipe: |
   rsync -ar $SOURCEDIR/ $INSTALLROOT/
   cmake --build . --target install ${JOBS:+-- -j$JOBS}

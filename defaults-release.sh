@@ -13,24 +13,18 @@ disable:
 overrides:
   autotools:
     tag: v1.5.0
-  boost:
-    version:  "%(tag_basename)s"
-    tag: "v1.67.0"
-    requires:
-      - "GCC-Toolchain:(?!osx)"
-      - Python
-    prefer_system_check: |
-     printf "#include \"boost/version.hpp\"\n# if (BOOST_VERSION != 106700)\n#error \"Cannot use system's boost. Boost > 1.64.00 required.\"\n#endif\nint main(){}" | gcc -I$(brew --prefix boost)/include -xc++ - -o /dev/null
   GCC-Toolchain:
     tag: v6.2.0-alice1
     prefer_system_check: |
       set -e
       which gfortran || { echo "gfortran missing"; exit 1; }
-      which cc && test -f $(dirname $(which cc))/c++ && printf "#define GCCVER ((__GNUC__ << 16)+(__GNUC_MINOR__ << 8)+(__GNUC_PATCHLEVEL__))\n#if (GCCVER < 0x060000 || GCCVER > 0x090000)\n#error \"System's GCC cannot be used: we need GCC 6.X. We are going to compile our own version.\"\n#endif\n" | cc -xc++ - -c -o /dev/null
+      which cc && test -f $(dirname $(which cc))/c++ && printf "#define GCCVER ((__GNUC__ << 16)+(__GNUC_MINOR__ << 8)+(__GNUC_PATCHLEVEL__))\n#if (GCCVER < 0x060000)\n#error \"System's GCC cannot be used: we need GCC 6.X. We are going to compile our own version.\"\n#endif\n" | cc -xc++ - -c -o /dev/null
   XRootD:
     tag: v4.8.3
   FairMQ:
-    tag: v1.2.6
+    tag: v1.2.7
+  FairLogger:
+    tag: v1.4.0
   ROOT:
     version: "%(tag_basename)s"
     tag: "v6-16-00"

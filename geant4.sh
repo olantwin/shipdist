@@ -4,6 +4,7 @@ source: https://github.com/alisw/geant4
 tag: v4.10.01.p03
 requires:
   - "GCC-Toolchain:(?!osx)"
+  - xercesc
 build_requires:
   - CMake
   - "Xcode:(osx.*)"

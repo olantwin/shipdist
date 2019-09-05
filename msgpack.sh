@@ -6,7 +6,7 @@ build_requires:
  - "GCC-Toolchain:(?!osx)"
 prefer_system: "(?!slc5)"
 prefer_system_check: |
-  printf "#include <msgpack/version.hpp>\n#define VERSION (MSGPACK_VERSION_MAJOR * 10000) + (MSGPACK_VERSION_MINOR * 100) + MSGPACK_VERSION_REVISION\n#if(VERSION < 20105)\n#error \"msgpack version >= 2.1.5 needed\"\n#endif\nint main(){}" | c++ -I$(brew --prefix msgpack)/include -xc++ -std=c++11 - -o /dev/null
+  printf "#include <msgpack/version.hpp>\n#define VERSION (MSGPACK_VERSION_MAJOR * 10000) + (MSGPACK_VERSION_MINOR * 100) + MSGPACK_VERSION_REVISION\n#if(VERSION != 20105)\n#error \"msgpack version = 2.1.5 needed\"\n#endif\nint main(){}" | c++ -I$(brew --prefix msgpack)/include -xc++ -std=c++11 - -o /dev/null
 ---
 mkdir -p $INSTALLROOT
 

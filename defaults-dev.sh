@@ -24,16 +24,19 @@ overrides:
   GCC-Toolchain:
     tag: v6.2.0-alice1
     prefer_system_check: |
-      set -e
-      which gfortran || { echo "gfortran missing"; exit 1; }
-      which cc && test -f $(dirname $(which cc))/c++ && printf "#define GCCVER ((__GNUC__ << 16)+(__GNUC_MINOR__ << 8)+(__GNUC_PATCHLEVEL__))\n#if (GCCVER < 0x060000 || GCCVER > 0x090000)\n#error \"System's GCC cannot be used: we need GCC 6.X. We are going to compile our own version.\"\n#endif\n" | cc -xc++ - -c -o /dev/null
+      echo true
+      # set -e
+      # which gfortran || { echo "gfortran missing"; exit 1; }
+      # which cc && test -f $(dirname $(which cc))/c++ && printf "#define GCCVER ((__GNUC__ << 16)+(__GNUC_MINOR__ << 8)+(__GNUC_PATCHLEVEL__))\n#if (GCCVER < 0x060000 || GCCVER > 0x090000)\n#error \"System's GCC cannot be used: we need GCC 6.X. We are going to compile our own version.\"\n#endif\n" | cc -xc++ - -c -o /dev/null
   XRootD:
     tag: v4.8.3
   FairMQ:
-    tag: v1.2.6
+    tag: v1.2.7.1
+  FairLogger:
+    tag: v1.5.0
   ROOT:
     version: "%(tag_basename)s"
-    tag: master
+    tag: "v6-16-00"
     source: https://github.com/root-mirror/root
     requires:
       - GSL
@@ -55,7 +58,7 @@ overrides:
     prefer_system_check: |
       printf "#include \"gsl/gsl_version.h\"\n#define GSL_V GSL_MAJOR_VERSION * 100 + GSL_MINOR_VERSION\n# if (GSL_V < 116)\n#error \"Cannot use system's gsl. Notice we only support versions from 1.16 (included)\"\n#endif\nint main(){}" | gcc  -I$(brew --prefix gsl)/include -xc++ - -o /dev/null
   FairRoot:
-    tag: dev
+    tag: v18.2.0
     source: https://github.com/FairRootGroup/FairRoot
   log4cpp:
     version: "%(tag_basename)s"

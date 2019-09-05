@@ -1,36 +1,82 @@
 package: boost
 version: "%(tag_basename)s%(defaults_upper)s"
-source: https://github.com/alisw/boost.git
-tag: v1.64.0
+source: https://github.com/FairRootGroup/boost.git
+tag: "v1.67.0"
 requires:
- - "GCC-Toolchain:(?!osx)"
+ - Python
 build_requires:
  - "bz2"
 prefer_system: (?!slc5)
 prefer_system_check: |
-  printf "#include \"boost/version.hpp\"\n# if (BOOST_VERSION < 106400)\n#error \"Cannot use system's boost. Boost > 1.64.00 required.\"\n#endif\nint main(){}" | gcc -I$(brew --prefix boost)/include -xc++ - -o /dev/null
+  printf "#include \"boost/version.hpp\"\n# if (BOOST_VERSION < 106400 || BOOST_VERSION > 106499)\n#error \"Cannot use system's boost: boost 1.64 required.\"\n#endif\nint main(){}" | gcc -I$(brew --prefix boost)/include -xc++ - -o /dev/null
 ---
 #!/bin/bash -e
 
-echo "Building ALICE boost. You can avoid that by installing at least boost 1.59."
-
-# Detect whether we can enable boost-python (internal boost detection is broken)
-BOOST_PYTHON=1
-python -c 'import sys; sys.exit(1 if sys.version_info < (2, 7) else 0)'                   && \
-  pip --help &> /dev/null                                                                 && \
-  printf '#include \"pyconfig.h"' | gcc -c -I$(python-config --cflags) -xc -o /dev/null - || \
-  unset BOOST_PYTHON
-[[ $BOOST_PYTHON ]] || WITHOUT_PYTHON="--without-python"
 
 TMPB2=$BUILDDIR/tmp-boost-build
-case $ARCHITECTURE in
-  osx*) TOOLSET=darwin ;;
-  *) TOOLSET=gcc ;;
-esac
+
+if [ -z "$CXX_COMPILER" ]; then
+  case $ARCHITECTURE in
+    osx*)
+      TOOLSET=clang
+      ;;
+    *)
+      TOOLSET=gcc
+      ;;
+  esac
+else
+  # In case the compiler is defined with the full path add the path to the PATH environment variable
+  # Otherwise boost may pickup the wrong compiler
+  DIR=${CXX_COMPILER%/*}
+  [[ -z "$DIR" ]] || export PATH=$DIR:$PATH
+  case $CXX_COMPILER in
+    *icpc*)
+      case $ARCHITECTURE in
+        osx*)
+          TOOLSET=intel-darwin
+          ;;
+        *)
+          TOOLSET=intel-linux
+          ;;
+      esac
+      ;;
+    *clang++*)
+      TOOLSET=clang
+      ;;
+    *g++*)
+      case $ARCHITECTURE in
+        osx*)
+          TOOLSET=darwin
+          ;;
+        *)
+          TOOLSET=gcc
+          ;;
+      esac
+      ;;
+    *)
+      echo "Compiler is not supported"
+      exit 1
+      ;;
+  esac
+fi
+
+if [[ $CXXFLAGS == *"-std=c++11"* ]]; then
+  EXTRA_CXXFLAGS="cxxflags=\"-std=c++11\""
+  if [[ $CXXFLAGS == *"-stdlib=libc++"* ]]; then
+    EXTRA_CXXFLAGS="cxxflags=\"-std=c++11\" cxxflags=\"-stdlib=libc++\" linkflags=\"-stdlib=libc++\""
+  fi
+elif [[ $CXXFLAGS == *"-std=c++14"* ]]; then
+  EXTRA_CXXFLAGS="cxxflags=\"-std=c++14\""
+  if [[ $CXXFLAGS == *"-stdlib=libc++"* ]]; then
+    EXTRA_CXXFLAGS="cxxflags=\"-std=c++14\" cxxflags=\"-stdlib=libc++\" linkflags=\"-stdlib=libc++\""
+  fi
+else
+  EXTRA_CXXFLAGS=""
+fi
 
 rsync -a $SOURCEDIR/ $BUILDDIR/
 cd $BUILDDIR/tools/build
-bash bootstrap.sh $TOOLSET
+bash bootstrap.sh --with-toolset=$TOOLSET
 mkdir -p $TMPB2
 ./b2 install --prefix=$TMPB2
 export PATH=$TMPB2/bin:$PATH
@@ -49,7 +95,6 @@ b2 -q                        \
    --without-locale          \
    --without-math            \
    --without-mpi             \
-   $WITHOUT_PYTHON           \
    --without-wave            \
    --debug-configuration     \
    toolset=$TOOLSET          \
@@ -59,6 +104,19 @@ b2 -q                        \
    $EXTRA_CXXFLAGS           \
    install
 [[ $BOOST_PYTHON ]] && ls -1 "$INSTALLROOT"/lib/*boost_python* > /dev/null
+
+if [[ ${ARCHITECTURE:0:3} == "osx" ]]; then
+  /usr/bin/find "$INSTALLROOT"/lib/libboost* -type f | \
+  while read BIN; do
+    MACHOTYPE=$(set +o pipefail; otool -h "$BIN" 2> /dev/null | grep filetype -A1 | tail -n1 | awk '{print $5}')
+    # See mach-o/loader.h from XNU sources: 2 == executable, 6 == dylib
+    if [[ $MACHOTYPE == 6 ]]; then
+      install_name_tool -add_rpath "$INSTALLROOT/lib/" "$BIN"
+    fi
+  done
+fi
+
+
 
 # Modulefile
 MODULEDIR="$INSTALLROOT/etc/modulefiles"
