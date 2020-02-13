@@ -1,6 +1,6 @@
 package: Python
 version: "%(tag_basename)s"
-tag: v3.6.8
+tag: v2.7.10
 source: https://github.com/python/cpython
 requires:
  - AliEn-Runtime:(?!.*ppc64)
@@ -17,7 +17,7 @@ env:
   PYTHONPATH: "$PYTHON_ROOT/lib/python/site-packages"
 prefer_system: "(?!slc5)"
 prefer_system_check:
-  python3 -c 'import sys; import sqlite3; sys.exit(1 if sys.version_info < (3, 5) else 0)' && pip3 --help > /dev/null && printf '#include "pyconfig.h"' | cc -c $(python-config --includes) -xc -o /dev/null -; if [ $? -ne 0 ]; then printf "Python, the Python development packages, and pip must be installed on your system.\nUsually those packages are called python, python-devel (or python-dev) and python-pip.\n"; exit 1; fi
+  python2 -c 'import sys; import sqlite3; sys.exit(1 if sys.version_info < (2, 7) else 0)' && pip2 --help > /dev/null && printf '#include "pyconfig.h"' | cc -c $(python-config --includes) -xc -o /dev/null -; if [ $? -ne 0 ]; then printf "Python, the Python development packages, and pip must be installed on your system.\nUsually those packages are called python, python-devel (or python-dev) and python-pip.\n"; exit 1; fi
 ---
 #!/bin/bash -ex
 
@@ -72,11 +72,11 @@ pushd "$INSTALLROOT/bin"
   PIP_BIN=$(for X in pip*; do echo "$X"; done | grep -E '^pip[0-9]+\.[0-9]+$' | head -n1)
   PYTHON_CONFIG_BIN=$(for X in python*-config; do echo "$X"; done | grep -E '^python[0-9]+\.[0-9]+m?-config$' | head -n1)
   [[ -x python ]] || ln -nfs "$PYTHON_BIN" python
-  [[ -x python3 ]] || ln -nfs "$PYTHON_BIN" python3
+  [[ -x python2 ]] || ln -nfs "$PYTHON_BIN" python2
   [[ -x pip ]] || ln -nfs "$PIP_BIN" pip
-  [[ -x pip3 ]] || ln -nfs "$PIP_BIN" pip3
+  [[ -x pip2 ]] || ln -nfs "$PIP_BIN" pip2
   [[ -x python-config ]] || ln -nfs "$PYTHON_CONFIG_BIN" python-config
-  [[ -x python3-config ]] || ln -nfs "$PYTHON_CONFIG_BIN" python3-config
+  [[ -x python2-config ]] || ln -nfs "$PYTHON_CONFIG_BIN" python2-config
 popd
 
 # Install Python SSL certificates right away
@@ -114,7 +114,7 @@ done
 env PATH="$INSTALLROOT/bin:$PATH" \
     LD_LIBRARY_PATH="$INSTALLROOT/lib:$LD_LIBRARY_PATH" \
     PYTHONHOME="$INSTALLROOT" \
-    python3 -c 'import tkinter'
+    python2 -c 'import _tkinter'
 
 # Modulefile
 MODULEDIR="$INSTALLROOT/etc/modulefiles"
@@ -142,5 +142,5 @@ setenv PYTHONHOME \$::env(BASEDIR)/$PKGNAME/\$version
 prepend-path PYTHONPATH $::env(PYTHON_ROOT)/lib/python/site-packages
 prepend-path PATH $::env(PYTHON_ROOT)/bin
 prepend-path LD_LIBRARY_PATH $::env(PYTHON_ROOT)/lib
-setenv SSL_CERT_FILE  [exec python3 -c "import certifi; print(certifi.where())"]
+setenv SSL_CERT_FILE  [exec python2 -c "import certifi; print certifi.where()"]
 EoF

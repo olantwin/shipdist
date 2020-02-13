@@ -24,23 +24,23 @@ if [[ $ARCHITECTURE != osx* && $PYTHON_MODULES_VERSION ]]; then
   BOOST_PYTHON=1
   if [[ $PYTHON_VERSION ]]; then
     # Our Python. We need to pass the appropriate flags to boost for the includes
-    BOOST_CXXFLAGS="$(python3-config --includes)"
+    BOOST_CXXFLAGS="$(python2-config --includes)"
   else
     # Using system's Python. We want to make sure `python-config` is available in $PATH and points
     # to the Python 3 version. Note that a symlink will not work due to the automatic prefix
     # calculation of the python-config script. Our own Python does not require tricks
-    if ! type python3-config &> /dev/null; then
-      echo "FATAL: cannot find python3-config in your \$PATH. Cannot enable boost_python"
+    if ! type python2-config &> /dev/null; then
+      echo "FATAL: cannot find python2-config in your \$PATH. Cannot enable boost_python"
       exit 1
     fi
     mkdir fake_bin
     cat > fake_bin/python-config <<\EOF
 #!/bin/bash
-exec python3-config "$@"
+exec python2-config "$@"
 EOF
     chmod +x fake_bin/python-config
-    ln -nfs "$(which python3)" fake_bin/python
-    ln -nfs "$(which pip3)" fake_bin/pip
+    ln -nfs "$(which python2)" fake_bin/python
+    ln -nfs "$(which pip2)" fake_bin/pip
     export PATH="$PWD/fake_bin:$PATH"
   fi
 fi
@@ -69,7 +69,7 @@ cd $BUILDDIR/tools/build
 # installations.
 case $ARCHITECTURE in
   osx*)  ;;
-  *) export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:$(python3 -c 'import sysconfig; print(sysconfig.get_path("include"))')" ;;
+  *) export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:$(python2 -c 'import sysconfig; print sysconfig.get_path("include")')" ;;
 esac
 bash bootstrap.sh $TOOLSET
 mkdir -p $TMPB2
